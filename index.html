@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vigilante RH</title>
+<meta name="theme-color" content="#0f1517">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigilante RH">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icono-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* App de una pantalla: barra superior, contenido por pestañas, barra de pestañas abajo (como una app nativa) */
+:root{
+  --bg:#0f1517; --panel:#172022; --panel2:#1d2a2d; --fg:#e4ecee; --muted:#93a4a8; --line:#29373a;
+  --accent:#4fc2b5; --up:#5ccf7f; --down:#ff8a7e; --warn:#e8bb55;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--fg);font:16px/1.45 var(--f-body);-webkit-tap-highlight-color:transparent}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 10px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+h1{font:800 20px var(--f-display);margin:0}
+.estado{font:500 12px var(--f-mono);color:var(--muted);text-align:right}
+.estado .vivo{color:var(--up)}
+main{padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 84px);display:flex;flex-direction:column;gap:16px;max-width:720px;margin:0 auto}
+.vista[hidden]{display:none}
+.vista{display:flex;flex-direction:column;gap:14px}
+h2{font:600 17px var(--f-display);margin:4px 0 0}
+.muted{color:var(--muted)} .foot{color:var(--muted);font-size:13px}
+.up{color:var(--up)} .down{color:var(--down)}
+.total{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:2px}
+.total .k{font:500 12px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.total .v{font:800 32px var(--f-display);font-variant-numeric:tabular-nums}
+#tokens{display:flex;flex-direction:column;gap:12px}
+.token{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.token .cab{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:14px 16px;cursor:pointer;align-items:baseline}
+.token .nom{font:800 19px var(--f-display)}
+.token .precio{font:600 18px var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.token .sub{font-size:14px;color:var(--muted)}
+.token .chg{font:500 14px var(--f-mono);text-align:right}
+.cambios{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
+.cambios div{padding:8px 4px;text-align:center;font:500 13px var(--f-mono);border-right:1px solid var(--line)}
+.cambios div:last-child{border-right:0}
+.cambios span{display:block;font-size:11px;color:var(--muted)}
+.detalle{border-top:1px solid var(--line);padding:12px 16px;display:flex;flex-direction:column;gap:12px}
+.metricas{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.m{background:var(--panel2);border-radius:10px;padding:8px 10px}
+.m .k{font:500 11px var(--f-mono);color:var(--muted);text-transform:uppercase}
+.m .v{font:600 16px var(--f-mono);font-variant-numeric:tabular-nums}
+.barra{height:8px;border-radius:4px;background:var(--down);overflow:hidden}
+.barra i{display:block;height:100%;background:var(--up)}
+.grafico{position:relative;width:100%;aspect-ratio:4/3;max-width:100%;border-radius:10px;overflow:hidden;background:var(--panel2)}
+.grafico iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.fila{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+label.cant{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--muted)}
+input{font:16px var(--f-mono);background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:150px}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}
+.btn{display:inline-block;font:600 14px var(--f-body);padding:8px 12px;border-radius:8px;border:1px solid var(--accent);color:var(--accent);background:transparent;text-decoration:none;cursor:pointer}
+.lista{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.item{display:grid;grid-template-columns:28px 1fr auto;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);align-items:center;text-decoration:none;color:var(--fg)}
+.item:last-child{border-bottom:0}
+.item .n{font:600 14px var(--f-mono);color:var(--muted)}
+.item .d{font:500 14px var(--f-mono)}
+.item .t{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.item .r{font:600 15px var(--f-mono);text-align:right}
+.g{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.g b{font-family:var(--f-display)}
+.g .q{font-size:14px;color:var(--muted)}
+.pill{display:inline-block;font:500 11px var(--f-mono);padding:2px 7px;border-radius:999px;background:var(--panel2);color:var(--muted);margin-left:6px;vertical-align:middle}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:5;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{background:none;border:0;color:var(--muted);padding:10px 0 8px;font:600 12px var(--f-body);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+nav button .i{font-size:20px;line-height:1}
+nav button[aria-selected="true"]{color:var(--accent)}
+.vacio{background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:16px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.parpadeo{animation:p 1s ease}@keyframes p{from{background:color-mix(in srgb,var(--accent) 25%,transparent)}}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Vigilante RH</h1>
+  <div class="estado"><span id="vivo" class="vivo">●</span> <span id="hora">cargando…</span></div>
+</header>
+
+<main>
+  <section class="vista" id="v-tokens">
+    <div class="total"><span class="k">Valor de mi cartera</span><span class="v" id="total">—</span><span class="foot" id="total-sub"></span></div>
+    <div id="tokens"></div>
+    <p class="foot">Precios de DexScreener, se actualizan solos cada 30 s. Toca un token para ver su gráfico.</p>
+  </section>
+
+  <section class="vista" id="v-ballenas" hidden>
+    <h2>Top 10 ballenas de hoy</h2>
+    <p class="muted" id="ballenas-sub"></p>
+    <div class="lista" id="ballenas"></div>
+  </section>
+
+  <section class="vista" id="v-nuevos" hidden>
+    <h2>Tokens nuevos que compran las ballenas</h2>
+    <p class="muted" id="nuevos-sub"></p>
+    <div id="nuevos"></div>
+  </section>
+
+  <section class="vista" id="v-guia" hidden>
+    <h2>Qué significa cada aviso</h2>
+    <p class="muted">Los mensajes que te mandan los bots en Telegram.</p>
+    <div id="guia" style="display:flex;flex-direction:column;gap:8px"></div>
+    <a class="btn" href="https://claude.ai/artifact/ENozTB7Dxy7QywMQHzdhYW" target="_blank" rel="noopener">Pregunta a Claude por un aviso</a>
+  </section>
+</main>
+
+<nav role="tablist">
+  <button role="tab" data-v="tokens" aria-selected="true"><span class="i">💼</span>Mis tokens</button>
+  <button role="tab" data-v="ballenas" aria-selected="false"><span class="i">🐋</span>Ballenas</button>
+  <button role="tab" data-v="nuevos" aria-selected="false"><span class="i">🆕</span>Nuevos</button>
+  <button role="tab" data-v="guia" aria-selected="false"><span class="i">📖</span>Avisos</button>
+</nav>
+
+<script>
+"use strict";
+var EXPLORADOR = "https://robinhoodchain.blockscout.com";
+var DATOS = {mis_tokens: [], ballenas: [], nuevos: null, actualizado: null};
+var MERCADO = {};
+var abierto = {};
+
+function guardar(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function leer(k, d){ try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+var cantidades = leer("cantidades", {});
+
+function usd(v){
+  if(v == null || isNaN(v)) return "—";
+  var a = Math.abs(v);
+  if(a >= 1e6) return "$" + (v/1e6).toFixed(2) + "M";
+  if(a >= 1e3) return "$" + (v/1e3).toFixed(1) + "k";
+  if(a >= 1) return "$" + v.toFixed(2);
+  return "$" + Number(v.toPrecision(3));
+}
+function pct(v){ if(v == null || isNaN(v)) return "—"; return (v > 0 ? "+" : "") + Number(v).toFixed(1) + "%"; }
+function clase(v){ return v > 0 ? "up" : v < 0 ? "down" : ""; }
+function corta(d){ return d.slice(0, 6) + "…" + d.slice(-4); }
+function el(tag, cls, txt){ var e = document.createElement(tag); if(cls) e.className = cls; if(txt != null) e.textContent = txt; return e; }
+
+// ---------- datos del vigilante (los publica GitHub cada día) ----------
+async function cargarDatos(){
+  try{
+    var r = await fetch("datos.json?t=" + Date.now(), {cache: "no-store"});
+    if(r.ok){ DATOS = await r.json(); }
+  }catch(e){}
+  // cantidades: se guardan solo en este móvil; el enlace puede traerlas (#Bucket=65000&HEDGE=65000)
+  var h = new URLSearchParams(location.hash.slice(1));
+  DATOS.mis_tokens.forEach(function(t){
+    var v = h.get(t.nombre);
+    if(v != null && !isNaN(+v)) cantidades[t.contrato] = +v;
+  });
+  if(location.hash){ guardar("cantidades", cantidades); history.replaceState(null, "", location.pathname); }
+  pintarBallenas(); pintarNuevos();
+}
+
+// ---------- precios en vivo ----------
+async function cargarMercado(){
+  var cs = DATOS.mis_tokens.map(function(t){ return t.contrato; });
+  if(!cs.length) return;
+  try{
+    var r = await fetch("https://api.dexscreener.com/tokens/v1/robinhood/" + cs.join(","));
+    var pares = await r.json();
+    var mejor = {};
+    (pares || []).forEach(function(p){
+      var a = ((p.baseToken || {}).address || "").toLowerCase();
+      var liq = +((p.liquidity || {}).usd || 0);
+      if(cs.indexOf(a) >= 0 && (!mejor[a] || liq > mejor[a].liq)) mejor[a] = {liq: liq, p: p};
+    });
+    Object.keys(mejor).forEach(function(a){ MERCADO[a] = mejor[a].p; });
+    document.getElementById("vivo").className = "vivo";
+    document.getElementById("hora").textContent = "en vivo · " + new Date().toLocaleTimeString("es-ES", {hour: "2-digit", minute: "2-digit", second: "2-digit"});
+  }catch(e){
+    document.getElementById("vivo").className = "down";
+    document.getElementById("hora").textContent = "sin conexión";
+  }
+  // no repintar mientras se escribe una cantidad
+  var a = document.activeElement;
+  if(!(a && a.tagName === "INPUT" && document.getElementById("tokens").contains(a))) pintarTokens();
+}
+
+function pintarTokens(){
+  var cont = document.getElementById("tokens");
+  var total = 0, total24 = 0;
+  cont.replaceChildren();
+  DATOS.mis_tokens.forEach(function(t){
+    var p = MERCADO[t.contrato] || {};
+    var precio = +p.priceUsd || null;
+    var ch = p.priceChange || {};
+    var cant = +cantidades[t.contrato] || 0;
+    var valor = precio ? cant * precio : 0;
+    total += valor;
+    if(precio && ch.h24 != null) total24 += valor - valor / (1 + ch.h24 / 100);
+
+    var card = el("div", "token");
+    var cab = el("div", "cab");
+    cab.setAttribute("role", "button"); cab.tabIndex = 0;
+    cab.append(el("span", "nom", t.nombre), el("span", "precio", precio ? usd(precio) : "—"));
+    cab.append(el("span", "sub", cant ? cant.toLocaleString("es-ES") + " · " + usd(valor) : "No tengo"));
+    var c24 = el("span", "chg " + clase(ch.h24), pct(ch.h24) + " 24 h"); cab.append(c24);
+    function alternar(){ abierto[t.contrato] = !abierto[t.contrato]; pintarTokens(); }
+    cab.addEventListener("click", alternar);
+    cab.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); alternar(); } });
+    card.append(cab);
+
+    var cam = el("div", "cambios");
+    [["5 min", ch.m5], ["1 h", ch.h1], ["6 h", ch.h6], ["24 h", ch.h24]].forEach(function(x){
+      var d = el("div", clase(x[1])); d.append(el("span", null, x[0]), document.createTextNode(pct(x[1]))); cam.append(d);
+    });
+    card.append(cam);
+
+    if(abierto[t.contrato]){
+      var det = el("div", "detalle");
+      var tx = (p.txns || {}).h1 || {}, tx24 = (p.txns || {}).h24 || {};
+      var met = el("div", "metricas");
+      [["Capitalización", usd(p.marketCap || p.fdv)], ["Liquidez", usd((p.liquidity || {}).usd)],
+       ["Volumen 24 h", usd((p.volume || {}).h24)], ["Ops 24 h", (tx24.buys || 0) + " C / " + (tx24.sells || 0) + " V"]]
+        .forEach(function(x){ var m = el("div", "m"); m.append(el("div", "k", x[0]), el("div", "v", x[1])); met.append(m); });
+      det.append(met);
+      var b = tx.buys || 0, s = tx.sells || 0;
+      det.append(el("div", "foot", "Última hora: " + b + " compras / " + s + " ventas"));
+      var barra = el("div", "barra"); var i = el("i"); i.style.width = (b + s ? 100 * b / (b + s) : 50) + "%"; barra.append(i); det.append(barra);
+      if(p.pairAddress){
+        var g = el("div", "grafico");
+        var f = document.createElement("iframe");
+        f.title = "Gráfico de " + t.nombre; f.loading = "lazy";
+        f.src = "https://dexscreener.com/robinhood/" + p.pairAddress + "?embed=1&theme=dark&chartTheme=dark&trades=0&info=0&chartLeftToolbar=0&interval=15";
+        g.append(f); det.append(g);
+      }
+      var fila = el("div", "fila");
+      var lab = el("label", "cant", "Tengo");
+      var inp = document.createElement("input"); inp.type = "number"; inp.inputMode = "decimal"; inp.min = "0";
+      inp.id = "cant-" + t.contrato; inp.value = cant || "";
+      inp.addEventListener("change", function(){ cantidades[t.contrato] = +inp.value || 0; guardar("cantidades", cantidades); pintarTokens(); });
+      inp.addEventListener("click", function(e){ e.stopPropagation(); });
+      lab.append(inp); fila.append(lab);
+      var a = el("a", "btn", "DexScreener"); a.href = p.url || ("https://dexscreener.com/robinhood/" + t.contrato); a.target = "_blank"; a.rel = "noopener";
+      fila.append(a); det.append(fila);
+      card.append(det);
+    }
+    cont.append(card);
+  });
+  document.getElementById("total").textContent = usd(total);
+  var sub = document.getElementById("total-sub");
+  sub.textContent = total24 ? (total24 > 0 ? "+" : "") + usd(total24).replace("$-", "-$") + " en 24 h" : "";
+  sub.className = "foot " + clase(total24);
+}
+
+function pintarBallenas(){
+  var cont = document.getElementById("ballenas");
+  cont.replaceChildren();
+  var bs = DATOS.ballenas || [];
+  document.getElementById("ballenas-sub").textContent = DATOS.actualizado_ballenas ?
+    "Las que más compran monedas pequeñas. Actualizado " + new Date(DATOS.actualizado_ballenas).toLocaleString("es-ES", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"}) + "." : "";
+  if(!bs.length){ cont.append(el("div", "vacio", "Aún no hay ranking. Se genera cada mañana.")); return; }
+  bs.forEach(function(b, i){
+    var a = el("a", "item"); a.href = EXPLORADOR + "/address/" + b.direccion; a.target = "_blank"; a.rel = "noopener";
+    var mid = el("div"); mid.append(el("div", "d", corta(b.direccion)), el("div", "t", (b.tokens_principales || []).join(", ")));
+    var r = el("div", "r"); r.append(document.createTextNode(usd(b.comprado_usd != null ? b.comprado_usd : b.volumen_usd)), el("div", "t", (b.operaciones || 0) + " ops"));
+    a.append(el("span", "n", String(i + 1)), mid, r); cont.append(a);
+  });
+}
+
+var ETIQ = {dentro: "🟢 Siguen dentro", saliendo: "🟡 Empiezan a vender", riesgo: "🟠 Con riesgos", tarde: "🔴 Llegas tarde"};
+function pintarNuevos(){
+  var cont = document.getElementById("nuevos");
+  cont.replaceChildren();
+  var n = DATOS.nuevos;
+  if(!n || !(n.tokens || []).length){
+    cont.append(el("div", "vacio", "Ninguna ballena ha comprado tokens recién creados en el último informe."));
+    document.getElementById("nuevos-sub").textContent = n ? "Último informe: " + new Date(n.generado * 1000).toLocaleString("es-ES") : "";
+    return;
+  }
+  document.getElementById("nuevos-sub").textContent = "Último informe: " + new Date(n.generado * 1000).toLocaleString("es-ES") + " · compras de " + n.horas + " h";
+  n.tokens.forEach(function(f){
+    var g = el("div", "g");
+    var t = el("b", null, f.simbolo); t.append(el("span", "pill", ETIQ[f.estado] || f.estado)); g.append(t);
+    g.append(el("span", null, f.ballenas.length + " ballena(s) · " + usd(f.compras_usd) + " · vendido " + Math.round(f.vendido_pct) + "%"));
+    g.append(el("span", "q", "Entrada " + usd(f.precio_entrada) + " → ahora " + usd(f.precio) + (f.x_desde_entrada ? " (x" + f.x_desde_entrada.toFixed(2) + ")" : "") + " · liquidez " + usd(f.liquidez)));
+    if((f.alertas || []).length) g.append(el("span", "q", "⚠️ " + f.alertas.join("; ")));
+    var a = el("a", null, "Ver gráfico"); a.href = f.url; a.target = "_blank"; a.rel = "noopener"; g.append(a);
+    cont.append(g);
+  });
+}
+
+// ---------- guía de avisos ----------
+var TIPOS = [
+  ["🔴","Venta grande","Alguien vende de golpe más de 750 $ de uno de tus tokens.","Mira quién es: si suele recomprar, puede ser una sacudida."],
+  ["🟢","Compra grande","Alguien compra de golpe más de 750 $.","Buena señal si se repite; una sola no basta."],
+  ["📉","Caída fuerte","Baja un 15 % o más desde el máximo de 24 h.","Lee la línea de debajo: 🟢 entrada, 🟡 espera, 🔴 cuidado."],
+  ["🟢","Posible zona de entrada","La venta se frena o quien tiró el precio recompra.","Valora comprar poco a poco."],
+  ["🟡","Espera","Las ventas siguen mandando.","No compres todavía."],
+  ["🔴","Cuidado","Salen varias ballenas o retiran liquidez.","Mejor no entrar."],
+  ["✅","Recuperado","Vuelve cerca de su máximo tras la caída.","Nada urgente."],
+  ["📈","Tendencia","Mucho movimiento en 1 h o 6 h.","Subiendo: no persigas el precio. Bajando: espera aviso de entrada."],
+  ["⚠️","Presión vendedora","Más ventas que compras en la última hora.","Suele anticipar bajadas."],
+  ["🔥","Presión compradora","Más compras que ventas en la última hora.","Suele anticipar subidas."],
+  ["🎣","Sacudida","Una ballena vendió para tirar el precio y recompra más barato.","Suele rebotar después."],
+  ["⚠️","Zona de venta de una ballena","Llega a donde una ballena suele vender.","Puede frenarse aquí."],
+  ["👀","Zona de recompra","Entra donde una ballena suele recomprar.","Posible suelo."],
+  ["🔄","Rotación","Una ballena pasa de uno de tus tokens a otro.","Dice hacia dónde va el dinero."],
+  ["☀️","Resumen diario","Foto de tus tokens a las 9:00.","Léelo con calma."],
+  ["🐋","Operación de ballena","Una del top 10 compra o vende.","Interesa si varias compran lo mismo."],
+  ["🆕","Tokens nuevos","Tokens recién creados que compran las ballenas.","Mucho riesgo: mira si llegas tarde."],
+  ["🏆","Top ballenas","Las 10 carteras que vigila hoy el bot.","Informativo."]
+];
+var guia = document.getElementById("guia");
+TIPOS.forEach(function(t){
+  var g = el("div", "g"); g.append(el("b", null, t[0] + " " + t[1]), el("span", null, t[2]), el("span", "q", "→ " + t[3])); guia.append(g);
+});
+
+// ---------- pestañas ----------
+var tabs = document.querySelectorAll("nav button");
+function ver(v){
+  tabs.forEach(function(b){ b.setAttribute("aria-selected", b.dataset.v === v ? "true" : "false"); });
+  document.querySelectorAll(".vista").forEach(function(s){ s.hidden = s.id !== "v-" + v; });
+  guardar("vista", v); window.scrollTo(0, 0);
+}
+tabs.forEach(function(b){ b.addEventListener("click", function(){ ver(b.dataset.v); }); });
+ver(leer("vista", "tokens"));
+
+// ---------- arranque ----------
+(async function(){
+  await cargarDatos();
+  pintarTokens();
+  await cargarMercado();
+  setInterval(function(){ if(!document.hidden) cargarMercado(); }, 30000);
+  setInterval(cargarDatos, 10 * 60000);
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) cargarMercado(); });
+})();
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(function(){}); }
+</script>
+</body>
+</html>
